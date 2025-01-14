@@ -1,1 +1,12 @@
-awk -F'"id":"' '{for (i=2; i<=NF; i++) {split($i, a, "\""); print a[1]}}'
+#!/bin/bash
+
+# Fetch the dashboard IDs and save them into a Bash array
+dashboard_ids=($(curl -s -X GET "https://api.datadoghq.eu/api/v1/dashboards" \
+    -H "DD-API-KEY: <YOUR_API_KEY>" \
+    -H "DD-APPLICATION-KEY: <YOUR_APPLICATION_KEY>" | awk -F'"id":"' '{for (i=2; i<=NF; i++) {split($i, a, "\""); print a[1]}}'))
+
+# Print all IDs in the list
+echo "Dashboard IDs:"
+for id in "${dashboard_ids[@]}"; do
+    echo "$id"
+done
