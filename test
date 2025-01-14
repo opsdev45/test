@@ -1,12 +1,25 @@
 #!/bin/bash
 
+# Set your API and Application keys
+API_KEY="<YOUR_API_KEY>"
+APP_KEY="<YOUR_APPLICATION_KEY>"
+
 # Fetch the dashboard IDs and save them into a Bash array
 dashboard_ids=($(curl -s -X GET "https://api.datadoghq.eu/api/v1/dashboards" \
-    -H "DD-API-KEY: <YOUR_API_KEY>" \
-    -H "DD-APPLICATION-KEY: <YOUR_APPLICATION_KEY>" | awk -F'"id":"' '{for (i=2; i<=NF; i++) {split($i, a, "\""); print a[1]}}'))
+    -H "DD-API-KEY: $API_KEY" \
+    -H "DD-APPLICATION-KEY: $APP_KEY" | awk -F'"id":"' '{for (i=2; i<=NF; i++) {split($i, a, "\""); print a[1]}}'))
 
-# Print all IDs in the list
-echo "Dashboard IDs:"
+# Print all IDs and fetch full JSON for each
+echo "Fetching full JSON for dashboards..."
 for id in "${dashboard_ids[@]}"; do
-    echo "$id"
+    echo "Fetching dashboard ID: $id"
+    
+    # Fetch the full JSON for each dashboard
+    dashboard_json=$(curl -s -X GET "https://api.datadoghq.eu/api/v1/dashboards/$id" \
+        -H "DD-API-KEY: $API_KEY" \
+        -H "DD-APPLICATION-KEY: $APP_KEY")
+    
+    # Save the JSON to a file named with the dashboard ID
+    echo "$dashboard_json" > "dashboard_$id.json"
+    echo "Saved dashboard $id to dashboard_$id.json"
 done
