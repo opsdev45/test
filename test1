@@ -1,0 +1,26 @@
+resource "aws_bedrockagent_knowledge_base" "kb" {
+  name = "MyKnowledgeBase"
+  role_arn = aws_iam_role.bedrock_kb_role.arn
+
+  dynamic "data_source_configuration" {
+    for_each = var.data_store_type == "neptune" ? [1] : []
+    content {
+      type = "NEPTUNE"
+      neptune_configuration {
+        cluster_endpoint = aws_neptune_cluster.default[0].endpoint
+        port             = aws_neptune_cluster.default[0].port
+        database_name    = "mydatabase"
+      }
+    }
+  }
+
+  dynamic "data_source_configuration" {
+    for_each = var.data_store_type == "opensearch" ? [1] : []
+    content {
+      type = "OPENSEARCH"
+      opensearch_configuration {
+        collection_arn = aws_opensearchserverless_collection.default[0].arn
+      }
+    }
+  }
+}
